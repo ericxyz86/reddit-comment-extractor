@@ -1,0 +1,5 @@
+{
+  "name": "Reddit Comment Extractor",
+  "description": "An application to extract Reddit comments based on specified subreddits, date ranges, and keywords, with the ability to download the results as an Excel file.",
+  "requestFramePermissions": []
+}
