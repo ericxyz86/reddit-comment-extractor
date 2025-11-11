@@ -1,7 +1,7 @@
 import type { Filters, Comment } from "../types";
 
-// Backend API URL
-const BACKEND_URL = "http://localhost:3002";
+// Backend API URL - Use environment variable or default to production
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://reddit-comment-extractor-backend.onrender.com";
 
 // Helper function to search posts via backend
 async function searchPosts(subreddit: string, query: string, limit: number = 100): Promise<any> {
