@@ -1,7 +1,7 @@
 import type { Filters, Comment } from "../types";
 
-// Backend API URL - Use environment variable or default to production
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://reddit-comment-extractor-backend.onrender.com";
+// Backend API URL - Use environment variable, or same-origin (empty string) for production, or Render fallback
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "";
 
 // Helper function to search posts via backend
 async function searchPosts(subreddit: string, query: string, limit: number = 100): Promise<any> {
