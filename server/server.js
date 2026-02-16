@@ -19,20 +19,24 @@ app.use(cors());
 app.use(express.json());
 
 // --- Data source selection ---
-// If SOCIAVAULT_API_KEY is set, use SociaVault (works from any IP / datacenter)
-// Otherwise, fall back to direct Reddit public JSON API (requires residential IP)
+// Priority: Monitor Proxy → Direct SociaVault → Direct Reddit
+// Monitor proxy centralizes logging & credit tracking across all apps
+const MONITOR_PROXY_URL = process.env.MONITOR_PROXY_URL; // e.g. http://sociavault-monitor:3080
+const MONITOR_API_KEY = process.env.MONITOR_API_KEY;
 const SOCIAVAULT_API_KEY = process.env.SOCIAVAULT_API_KEY;
-const USE_SOCIAVAULT = !!SOCIAVAULT_API_KEY;
-const SOCIAVAULT_BASE = 'https://api.sociavault.com/v1/scrape/reddit';
+const USE_MONITOR = !!(MONITOR_PROXY_URL && MONITOR_API_KEY);
+const USE_SOCIAVAULT = USE_MONITOR || !!SOCIAVAULT_API_KEY;
+const SOCIAVAULT_BASE = USE_MONITOR
+  ? `${MONITOR_PROXY_URL}/proxy/v1/scrape/reddit`
+  : 'https://api.sociavault.com/v1/scrape/reddit';
 
-// --- SociaVault helpers ---
+// --- SociaVault helpers (via monitor proxy or direct) ---
 async function sociavaultRequest(endpoint, params = {}) {
   const url = `${SOCIAVAULT_BASE}${endpoint}`;
-  const response = await axios.get(url, {
-    params,
-    headers: { 'X-API-Key': SOCIAVAULT_API_KEY },
-    timeout: 30000,
-  });
+  const headers = USE_MONITOR
+    ? { 'X-App-Name': 'reddit-extractor', 'X-Monitor-Key': MONITOR_API_KEY }
+    : { 'X-API-Key': SOCIAVAULT_API_KEY };
+  const response = await axios.get(url, { params, headers, timeout: 30000 });
   return response.data;
 }
 
